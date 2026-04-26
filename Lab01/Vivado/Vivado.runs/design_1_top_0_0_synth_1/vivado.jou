@@ -1,0 +1,14 @@
+#-----------------------------------------------------------
+# Vivado v2023.1 (64-bit)
+# SW Build 3865809 on Sun May  7 15:05:29 MDT 2023
+# IP Build 3864474 on Sun May  7 20:36:21 MDT 2023
+# SharedData Build 3865790 on Sun May 07 13:33:03 MDT 2023
+# Start of session at: Thu Mar 19 20:03:58 2026
+# Process ID: 24300
+# Current directory: C:/Users/rlaqj/Project/DSD/Lab/Lab01/Vivado/Vivado.runs/design_1_top_0_0_synth_1
+# Command line: vivado.exe -log design_1_top_0_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source design_1_top_0_0.tcl
+# Log file: C:/Users/rlaqj/Project/DSD/Lab/Lab01/Vivado/Vivado.runs/design_1_top_0_0_synth_1/design_1_top_0_0.vds
+# Journal file: C:/Users/rlaqj/Project/DSD/Lab/Lab01/Vivado/Vivado.runs/design_1_top_0_0_synth_1\vivado.jou
+# Running On: Bamguri, OS: Windows, CPU Frequency: 1996 MHz, CPU Physical cores: 12, Host memory: 16474 MB
+#-----------------------------------------------------------
+source design_1_top_0_0.tcl -notrace

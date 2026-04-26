@@ -1,0 +1,5 @@
+set_property SRC_FILE_INFO {cfile:C:/Users/rlaqj/Project/DSD/Lab/Lab01/Vivado/Vivado.srcs/constrs_1/new/top.xdc rfile:../../../Vivado.srcs/constrs_1/new/top.xdc id:1} [current_design]
+set_property src_info {type:XDC file:1 line:2 export:INPUT save:INPUT read:READ} [current_design]
+create_clock -period 10.000 -name clk [get_ports clk]
+set_property src_info {type:XDC file:1 line:5 export:INPUT save:INPUT read:READ} [current_design]
+set_false_path -from [get_ports rst_n]
