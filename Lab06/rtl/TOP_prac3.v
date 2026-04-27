@@ -10,17 +10,17 @@ module TOP_prac3 #(
     parameter WEIGHT_WIDTH = 3,
     parameter WEIGHT_HEIGHT = 3
 ) (
-    input               i_clk,
-    input               i_rstn,
-    input               i_line_done,
-    input               i_input_valid,
-    input [47:0]        i_input_data,
-    input               i_weight_valid,
-    input [47:0]        i_weight_data,
+    input wire               i_clk,
+    input wire               i_rstn,
+    input wire               i_line_done,
+    input wire               i_input_valid,
+    input wire [47:0]        i_input_data,
+    input wire               i_weight_valid,
+    input wire [47:0]        i_weight_data,
 
-    output              o_output_valid,
-    output [31:0]       o_output,
-    output              o_line_rd_done
+    output wire              o_output_valid,
+    output wire [31:0]       o_output,
+    output wire              o_line_rd_done
 );
 
     // FSM states mirror TOP_prac1, but each pixel contains three channels.
