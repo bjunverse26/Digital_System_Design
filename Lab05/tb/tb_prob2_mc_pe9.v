@@ -35,8 +35,8 @@
 
 module tb_prob2_mc_pe9();
 
-parameter INIT_INPUT_BRAM = "C:\\Users\\rlaqj\\Project\\Digital_System_Design\\Lecture\\Lab05\\rtl\\prob2\\act.txt";
-parameter INIT_WEIGHT_BRAM = "C:\\Users\\rlaqj\\Project\\Digital_System_Design\\Lecture\\Lab05\\rtl\\prob2\\w.txt";
+parameter INIT_INPUT_BRAM = "C:/Users/rlaqj/Project/Digital_Circuit/Digital_System_Design/Lab05/rtl/prob2/act.txt";
+parameter INIT_WEIGHT_BRAM = "C:/Users/rlaqj/Project/Digital_Circuit/Digital_System_Design/Lab05/rtl/prob2/w.txt";
 
 
 reg         i_clk;

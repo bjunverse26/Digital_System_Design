@@ -35,8 +35,8 @@
 
 module tb_prob1_sc_pe3();
 
-parameter INIT_INPUT_BRAM = "C:\\Users\\rlaqj\\Project\\Digital_System_Design\\Lecture\\Lab05\\rtl\\prob1\\act.txt";
-parameter INIT_WEIGHT_BRAM = "C:\\Users\\rlaqj\\Project\\Digital_System_Design\\Lecture\\Lab05\\rtl\\prob1\\w.txt";
+parameter INIT_INPUT_BRAM = "C:/Users/rlaqj/Project/Digital_Circuit/Digital_System_Design/Lab05/rtl/prob1/act.txt";
+parameter INIT_WEIGHT_BRAM = "C:/Users/rlaqj/Project/Digital_Circuit/Digital_System_Design/Lab05/rtl/prob1/w.txt";
 
 reg         i_clk;
 reg         i_rstn;
