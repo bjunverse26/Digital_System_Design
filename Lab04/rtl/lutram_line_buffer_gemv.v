@@ -1,8 +1,14 @@
+//==============================================================================
+// File Name   : lutram_line_buffer_gemv.v
+// Project     : Digital System Design - Lab04
+// Author      : Beomjun Kim
+// Description : GEMV datapath with URAM backing storage and LUTRAM line buffers.
+// Notes       : Wide URAM reads are cached into small distributed-RAM lines so
+//               individual 16-bit elements can feed four parallel MAC lanes.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
-// GEMV datapath with URAM backing storage and LUTRAM line buffers.
-// Wide URAM reads are cached into small distributed-RAM lines so individual
-// 16-bit elements can be selected for four parallel MAC accumulators.
 module lutram_line_buffer_gemv #(
     parameter INPUT_WIDTH              = 128,
     parameter WEIGHT_WIDTH             = 128,
@@ -32,46 +38,46 @@ module lutram_line_buffer_gemv #(
     input  wire                                   i_clk,
     input  wire                                   i_rstn,
 
-    // input URAM control
+    // Input URAM control.
     input  wire                                   i_input_wr_en,
     input  wire [INPUT_ADDR_WIDTH-1:0]            i_input_wr_addr,
     input  wire [INPUT_WIDTH-1:0]                 i_input_wr_din,
     input  wire                                   i_input_rd_en,
     input  wire [INPUT_ADDR_WIDTH-1:0]            i_input_rd_addr,
 
-    // weight URAM control
+    // Weight URAM control.
     input  wire                                   i_weight_wr_en,
     input  wire [WEIGHT_ADDR_WIDTH-1:0]           i_weight_wr_addr,
     input  wire [WEIGHT_WIDTH-1:0]                i_weight_wr_din,
     input  wire                                   i_weight_rd_en,
     input  wire [WEIGHT_ADDR_WIDTH-1:0]           i_weight_rd_addr,
 
-    // input LUTRAM control
+    // Input LUTRAM control.
     input  wire [3:0]                             i_input_lutram_wr_en,
     input  wire [INPUT_LUTRAM_ADDR_WIDTH-1:0]     i_input_lutram_wr_addr,
     input  wire                                   i_input_lutram_rd_en,
     input  wire [INPUT_LUTRAM_ADDR_WIDTH-1:0]     i_input_lutram_rd_addr,
     input  wire [INPUT_LUTRAM_SEL_WIDTH-1:0]      i_input_lutram_rd_sel,
 
-    // weight LUTRAM control
+    // Weight LUTRAM control.
     input  wire                                   i_weight_lutram_wr_en,
     input  wire [WEIGHT_LUTRAM_ADDR_WIDTH-1:0]    i_weight_lutram_wr_addr,
     input  wire                                   i_weight_lutram_rd_en,
     input  wire [WEIGHT_LUTRAM_ADDR_WIDTH-1:0]    i_weight_lutram_rd_addr,
     input  wire [WEIGHT_LUTRAM_SEL_WIDTH-1:0]     i_weight_lutram_rd_sel,
 
-    // output LUTRAM control
+    // Output LUTRAM control.
     input  wire                                   i_output_lutram_wr_en,
     input  wire [OUTPUT_LUTRAM_ADDR_WIDTH-1:0]    i_output_lutram_wr_addr,
     input  wire                                   i_output_lutram_rd_en,
     input  wire [OUTPUT_LUTRAM_ADDR_WIDTH-1:0]    i_output_lutram_rd_addr,
     input  wire [OUTPUT_LUTRAM_SEL_WIDTH-1:0]     i_output_lutram_rd_sel,
 
-    // MAC control
+    // MAC control.
     input  wire                                   i_acc_clear,
     input  wire                                   i_mac_enable,
 
-    // output URAM write control
+    // Output URAM write/read control.
     input  wire                                   i_output_wr_en,
     input  wire [OUTPUT_ADDR_WIDTH-1:0]           i_output_wr_addr,
     input  wire                                   i_output_rd_en,
@@ -218,7 +224,7 @@ module lutram_line_buffer_gemv #(
     );
 
     // Four MAC lanes share the selected weight and consume four input rows.
-    MAC u_mac0(
+    MAC u_mac0 (
         .i_clk       (i_clk),
         .i_rstn      (i_rstn & ~i_acc_clear),
         .i_dsp_enable(i_mac_enable),
@@ -227,7 +233,7 @@ module lutram_line_buffer_gemv #(
         .o_dsp_output(mac0)
     );
 
-    MAC u_mac1(
+    MAC u_mac1 (
         .i_clk       (i_clk),
         .i_rstn      (i_rstn & ~i_acc_clear),
         .i_dsp_enable(i_mac_enable),
@@ -236,7 +242,7 @@ module lutram_line_buffer_gemv #(
         .o_dsp_output(mac1)
     );
 
-    MAC u_mac2(
+    MAC u_mac2 (
         .i_clk       (i_clk),
         .i_rstn      (i_rstn & ~i_acc_clear),
         .i_dsp_enable(i_mac_enable),
@@ -245,7 +251,7 @@ module lutram_line_buffer_gemv #(
         .o_dsp_output(mac2)
     );
 
-    MAC u_mac3(
+    MAC u_mac3 (
         .i_clk       (i_clk),
         .i_rstn      (i_rstn & ~i_acc_clear),
         .i_dsp_enable(i_mac_enable),
@@ -294,8 +300,7 @@ module lutram_line_buffer_gemv #(
             o_output1      <= {OUTPUT_WIDTH{1'b0}};
             o_output2      <= {OUTPUT_WIDTH{1'b0}};
             o_output3      <= {OUTPUT_WIDTH{1'b0}};
-        end
-        else begin
+        end else begin
             if (i_acc_clear) begin
                 // i_acc_clear starts a new accumulation window.
                 o_output_valid <= 1'b0;
@@ -303,8 +308,7 @@ module lutram_line_buffer_gemv #(
                 o_output1      <= {OUTPUT_WIDTH{1'b0}};
                 o_output2      <= {OUTPUT_WIDTH{1'b0}};
                 o_output3      <= {OUTPUT_WIDTH{1'b0}};
-            end
-            else begin
+            end else begin
                 if (i_output_lutram_wr_en) begin
                     // Mirror the MAC outputs externally when they are committed
                     // to the output LUTRAM.

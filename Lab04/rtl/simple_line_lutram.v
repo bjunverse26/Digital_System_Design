@@ -1,3 +1,12 @@
+//==============================================================================
+// File Name   : simple_line_lutram.v
+// Project     : Digital System Design - Lab04
+// Author      : Beomjun Kim
+// Description : Distributed-RAM line buffer with banked element selection.
+// Notes       : A wide line is split into RD_WIDTH banks so one element can be
+//               selected and registered per read.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
 module simple_line_lutram #(
@@ -31,14 +40,15 @@ module simple_line_lutram #(
 
             // Clear LUTRAM contents for deterministic simulation startup.
             initial begin
-                for (i = 0; i < DEPTH; i = i + 1)
+                for (i = 0; i < DEPTH; i = i + 1) begin
                     ram[i] = {RD_WIDTH{1'b0}};
+                end
             end
 
             always @(posedge clk) begin
-                // Write one slice of the incoming wide line into this bank.
-                if (wr_en)
+                if (wr_en) begin
                     ram[wr_addr] <= wr_din[(b*RD_WIDTH) +: RD_WIDTH];
+                end
             end
 
             // Asynchronous bank read; selected output is registered below.
@@ -50,10 +60,10 @@ module simple_line_lutram #(
     assign sel_do = bank_do[(rd_sel*RD_WIDTH) +: RD_WIDTH];
 
     always @(posedge clk) begin
-        // Register the selected element to match the rest of the datapath.
-        if (rd_en)
+        if (rd_en) begin
             rd_dout <= sel_do;
-        else
+        end else begin
             rd_dout <= {RD_WIDTH{1'b0}};
+        end
     end
 endmodule

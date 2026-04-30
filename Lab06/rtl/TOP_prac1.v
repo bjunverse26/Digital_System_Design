@@ -1,26 +1,31 @@
+//==============================================================================
+// File Name   : TOP_prac1.v
+// Project     : Digital System Design - Lab06
+// Author      : Beomjun Kim
+// Description : Single-channel 3x3 convolution engine for a 5x5 input image.
+// Notes       : Three input lines are buffered, a 3x3 window is slid across
+//               them, and the next line is requested after each output row.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
-// TOP prac1
-// Single-channel 3x3 convolution engine for a 5x5 input image.
-// The DUT buffers three input lines, slides a 3x3 window across them, and
-// requests the next input line after each output row is produced.
 module TOP_prac1 #(
-    parameter INPUT_WIDTH = 5,
-    parameter INPUT_HEIGHT = 5,
-    parameter WEIGHT_WIDTH = 3,
+    parameter INPUT_WIDTH   = 5,
+    parameter INPUT_HEIGHT  = 5,
+    parameter WEIGHT_WIDTH  = 3,
     parameter WEIGHT_HEIGHT = 3
 ) (
-    input wire               i_clk,
-    input wire               i_rstn,
-    input wire               i_line_done,
-    input wire               i_input_valid,
-    input wire [15:0]        i_input_data,
-    input wire               i_weight_valid,
-    input wire [15:0]        i_weight_data,
+    input  wire        i_clk,
+    input  wire        i_rstn,
+    input  wire        i_line_done,
+    input  wire        i_input_valid,
+    input  wire [15:0] i_input_data,
+    input  wire        i_weight_valid,
+    input  wire [15:0] i_weight_data,
 
-    output wire              o_output_valid,
-    output wire [31:0]       o_output,
-    output wire              o_line_rd_done
+    output wire        o_output_valid,
+    output wire [31:0] o_output,
+    output wire        o_line_rd_done
 );
 
     // FSM states for initial fill, window computation, line refill, and done.
@@ -68,8 +73,7 @@ module TOP_prac1 #(
             for (i = 0; i < 9; i = i + 1) begin
                 r_weight[i] <= 16'd0;
             end
-        end
-        else begin
+        end else begin
             r_output_valid <= 1'b0;
             r_line_rd_done <= 1'b0;
             r_output       <= 32'd0;

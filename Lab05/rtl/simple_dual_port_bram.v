@@ -1,3 +1,12 @@
+//==============================================================================
+// File Name   : simple_dual_port_bram.v
+// Project     : Digital System Design - Lab05
+// Author      : Beomjun Kim
+// Description : Parameterized simple dual-port block RAM wrapper.
+// Notes       : Supports one synchronous write port, one synchronous read port,
+//               and optional memory initialization by hex file.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
 module simple_dual_port_bram #(
@@ -6,13 +15,13 @@ module simple_dual_port_bram #(
     parameter ADDR_WIDTH = $clog2(DEPTH),
     parameter INIT_FILE  = ""
 )(
-    input  wire                  clk        ,
-    input  wire                  wr_en      ,
-    input  wire                  rd_en      ,
-    input  wire [ADDR_WIDTH-1:0] wr_addr    ,
-    input  wire [ADDR_WIDTH-1:0] rd_addr    ,
-    input  wire [WIDTH-1:0]      wr_din     ,
-    output reg                   rd_valid   ,
+    input  wire                  clk,
+    input  wire                  wr_en,
+    input  wire                  rd_en,
+    input  wire [ADDR_WIDTH-1:0] wr_addr,
+    input  wire [ADDR_WIDTH-1:0] rd_addr,
+    input  wire [WIDTH-1:0]      wr_din,
+    output reg                   rd_valid,
     output reg  [WIDTH-1:0]      rd_dout
 );
 
@@ -36,10 +45,10 @@ module simple_dual_port_bram #(
 
     always @(posedge clk) begin
         // Independent write port.
-        if (wr_en)
+        if (wr_en) begin
             mem[wr_addr] <= wr_din;
+        end
 
-        // Synchronous read port. rd_valid follows rd_en by one clock.
         if (rd_en) begin
             rd_dout <= mem[rd_addr]; // READ_FIRST
         end

@@ -1,3 +1,12 @@
+//==============================================================================
+// File Name   : simple_dual_port_uram.v
+// Project     : Digital System Design - Lab04
+// Author      : Beomjun Kim
+// Description : Parameterized simple dual-port UltraRAM wrapper.
+// Notes       : Supports synchronous write/read ports and optional memory
+//               initialization by hex file.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
 module simple_dual_port_uram #(
@@ -37,10 +46,10 @@ module simple_dual_port_uram #(
 
     always @(posedge clk) begin
         // Independent write port.
-        if (wr_en)
+        if (wr_en) begin
             mem[wr_addr] <= wr_din;
+        end
 
-        // Synchronous read port. rd_valid is the one-cycle delayed rd_en.
         if (rd_en) begin
             rd_dout <= mem[rd_addr]; // READ_FIRST
         end

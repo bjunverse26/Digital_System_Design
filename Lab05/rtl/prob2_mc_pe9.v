@@ -1,15 +1,22 @@
+//==============================================================================
+// File Name   : prob2_mc_pe9.v
+// Project     : Digital System Design - Lab05
+// Author      : Beomjun Kim
+// Description : Multi-channel PE using three parallel single-channel PUs.
+// Notes       : Packed 48-bit activation and weight inputs carry three 16-bit
+//               channels that are reduced after each PU output.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
-// Multi-channel PE using three parallel single-channel PUs.
-// Packed 48-bit activation/weight inputs carry three 16-bit channels.
 module prob2_mc_pe9 (
-    input wire                       i_clk,
-    input wire                       i_rstn,
-    input wire                       i_act_shift,
-    input wire signed [47:0]         i_act,
-    input wire                       i_w_shift,
-    input wire signed [47:0]         i_w,
-    input wire                       i_pu_en,
+    input  wire                      i_clk,
+    input  wire                      i_rstn,
+    input  wire                      i_act_shift,
+    input  wire signed [47:0]        i_act,
+    input  wire                      i_w_shift,
+    input  wire signed [47:0]        i_w,
+    input  wire                      i_pu_en,
 
     output wire signed [15:0]        o_output,
     output reg                       o_output_valid
@@ -44,49 +51,49 @@ module prob2_mc_pe9 (
 
     // Channel 0 PU.
     pu u_pu0 (
-        .i_clk(i_clk),
-        .i_rstn(i_rstn),
-        .i_act_shift(i_act_shift),
-        .i_act(act0),
-        .i_w_shift(i_w_shift),
-        .i_w(w0),
-        .i_pu_en(i_pu_en),
+        .i_clk          (i_clk),
+        .i_rstn         (i_rstn),
+        .i_act_shift    (i_act_shift),
+        .i_act          (act0),
+        .i_w_shift      (i_w_shift),
+        .i_w            (w0),
+        .i_pu_en        (i_pu_en),
 
-        .o_output(o_acc0),
-        .o_output_valid(o_acc_valid0)
+        .o_output       (o_acc0),
+        .o_output_valid (o_acc_valid0)
     );
 
     // Channel 1 PU.
     pu u_pu1 (
-        .i_clk(i_clk),
-        .i_rstn(i_rstn),
-        .i_act_shift(i_act_shift),
-        .i_act(act1),
-        .i_w_shift(i_w_shift),
-        .i_w(w1),
-        .i_pu_en(i_pu_en),
+        .i_clk          (i_clk),
+        .i_rstn         (i_rstn),
+        .i_act_shift    (i_act_shift),
+        .i_act          (act1),
+        .i_w_shift      (i_w_shift),
+        .i_w            (w1),
+        .i_pu_en        (i_pu_en),
 
-        .o_output(o_acc1),
-        .o_output_valid(o_acc_valid1)
+        .o_output       (o_acc1),
+        .o_output_valid (o_acc_valid1)
     );
 
     // Channel 2 PU.
     pu u_pu2 (
-        .i_clk(i_clk),
-        .i_rstn(i_rstn),
-        .i_act_shift(i_act_shift),
-        .i_act(act2),
-        .i_w_shift(i_w_shift),
-        .i_w(w2),
-        .i_pu_en(i_pu_en),
+        .i_clk          (i_clk),
+        .i_rstn         (i_rstn),
+        .i_act_shift    (i_act_shift),
+        .i_act          (act2),
+        .i_w_shift      (i_w_shift),
+        .i_w            (w2),
+        .i_pu_en        (i_pu_en),
 
-        .o_output(o_acc2),
-        .o_output_valid(o_acc_valid2)
+        .o_output       (o_acc2),
+        .o_output_valid (o_acc_valid2)
     );
 
     always @(posedge i_clk or negedge i_rstn) begin
         if (!i_rstn) begin
-            o_axis_sum <= 0;
+            o_axis_sum <= 32'sd0;
         end else begin
             // Sum across the three channel accumulations.
             o_axis_sum <= o_acc0 + o_acc1 + o_acc2;
@@ -95,7 +102,7 @@ module prob2_mc_pe9 (
 
     always @(posedge i_clk or negedge i_rstn) begin
         if (!i_rstn) begin
-            o_output_valid <= 0;
+            o_output_valid <= 1'b0;
         end else begin
             // Output is valid only when every channel PU has a valid result.
             o_output_valid <= o_acc_valid0 & o_acc_valid1 & o_acc_valid2;

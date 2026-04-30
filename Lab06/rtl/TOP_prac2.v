@@ -1,28 +1,33 @@
+//==============================================================================
+// File Name   : TOP_prac2.v
+// Project     : Digital System Design - Lab06
+// Author      : Beomjun Kim
+// Description : Multi-channel output-stationary 3x3 convolution engine.
+// Notes       : Each channel is streamed through the same spatial datapath;
+//               partial sums are kept by output position and emitted on LAST_CH.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
-// TOP prac2
-// Multi-channel output-stationary 3x3 convolution engine.
-// Each channel is streamed through the same spatial datapath; partial sums are
-// kept in r_psum by output position and final outputs are emitted on LAST_CH.
 module TOP_prac2 #(
-    parameter INPUT_WIDTH = 5,
-    parameter INPUT_HEIGHT = 5,
-    parameter WEIGHT_WIDTH = 3,
+    parameter INPUT_WIDTH   = 5,
+    parameter INPUT_HEIGHT  = 5,
+    parameter WEIGHT_WIDTH  = 3,
     parameter WEIGHT_HEIGHT = 3
 ) (
-    input wire              i_clk,
-    input wire              i_rstn,
-    input wire [1:0]        i_ch,
-    input wire              i_line_done,
-    input wire              i_input_valid,
-    input wire [15:0]       i_input_data,
-    input wire              i_weight_valid,
-    input wire [15:0]       i_weight_data,
+    input  wire        i_clk,
+    input  wire        i_rstn,
+    input  wire [1:0]  i_ch,
+    input  wire        i_line_done,
+    input  wire        i_input_valid,
+    input  wire [15:0] i_input_data,
+    input  wire        i_weight_valid,
+    input  wire [15:0] i_weight_data,
 
-    output wire             o_output_valid,
-    output wire [31:0]      o_output,
-    output wire             o_line_rd_done,
-    output wire             o_ch_done
+    output wire        o_output_valid,
+    output wire [31:0] o_output,
+    output wire        o_line_rd_done,
+    output wire        o_ch_done
 );
 
     // FSM states for channel input fill, compute, line refill, and channel done.
@@ -125,8 +130,7 @@ module TOP_prac2 #(
                 r_weight[i] <= 16'd0;
                 r_psum[i]   <= 32'd0;
             end
-        end
-        else begin
+        end else begin
             r_output_valid <= 1'b0;
             r_output       <= 32'd0;
             r_line_rd_done <= 1'b0;

@@ -1,9 +1,15 @@
+//==============================================================================
+// File Name   : uram_based_gemv.v
+// Project     : Digital System Design - Lab04
+// Author      : Beomjun Kim
+// Description : URAM-backed GEMV datapath with eight parallel MAC lanes and a
+//               registered reduction tree.
+// Notes       : Output-memory commands are delayed to align with MAC and adder
+//               tree latency before writing reduced results.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
-// GEMV datapath backed by UltraRAM.
-// Wide input and weight words are read from URAM, split into eight 16-bit lanes,
-// accumulated by parallel MACs, reduced through a pipelined adder tree, and then
-// written back to output URAM.
 module uram_based_gemv #(
     parameter INPUT_WIDTH       = 128,
     parameter WEIGHT_WIDTH      = 128,
@@ -20,28 +26,28 @@ module uram_based_gemv #(
     input  wire                         i_clk,
     input  wire                         i_rstn,
 
-    // input URAM control
+    // Input URAM control.
     input  wire                         i_input_wr_en,
     input  wire [INPUT_ADDR_WIDTH-1:0]  i_input_wr_addr,
     input  wire [INPUT_WIDTH-1:0]       i_input_wr_din,
     input  wire                         i_input_rd_en,
     input  wire [INPUT_ADDR_WIDTH-1:0]  i_input_rd_addr,
 
-    // weight URAM control
+    // Weight URAM control.
     input  wire                         i_weight_wr_en,
     input  wire [WEIGHT_ADDR_WIDTH-1:0] i_weight_wr_addr,
     input  wire [WEIGHT_WIDTH-1:0]      i_weight_wr_din,
     input  wire                         i_weight_rd_en,
     input  wire [WEIGHT_ADDR_WIDTH-1:0] i_weight_rd_addr,
 
-    // MAC control
+    // MAC control.
     input  wire                         i_mac_enable,
 
-    // output URAM write control
+    // Output URAM write control.
     input  wire                         i_output_wr_en,
     input  wire [OUTPUT_ADDR_WIDTH-1:0] i_output_wr_addr,
 
-    // output URAM read control
+    // Output URAM read control.
     input  wire                         i_output_rd_en,
     input  wire [OUTPUT_ADDR_WIDTH-1:0] i_output_rd_addr,
     output wire                         o_output_rd_valid,
@@ -98,9 +104,9 @@ module uram_based_gemv #(
 
     // Activation/input vector storage.
     simple_dual_port_uram #(
-        .WIDTH(INPUT_WIDTH),
-        .DEPTH(INPUT_DEPTH),
-        .ADDR_WIDTH(INPUT_ADDR_WIDTH)
+        .WIDTH      (INPUT_WIDTH),
+        .DEPTH      (INPUT_DEPTH),
+        .ADDR_WIDTH (INPUT_ADDR_WIDTH)
     ) u_input_uram (
         .clk     (i_clk              ),
         .wr_en   (i_input_wr_en      ),
@@ -114,9 +120,9 @@ module uram_based_gemv #(
 
     // Weight vector storage.
     simple_dual_port_uram #(
-        .WIDTH(WEIGHT_WIDTH),
-        .DEPTH(WEIGHT_DEPTH),
-        .ADDR_WIDTH(WEIGHT_ADDR_WIDTH)
+        .WIDTH      (WEIGHT_WIDTH),
+        .DEPTH      (WEIGHT_DEPTH),
+        .ADDR_WIDTH (WEIGHT_ADDR_WIDTH)
     ) u_weight_uram (
         .clk     (i_clk               ),
         .wr_en   (i_weight_wr_en      ),
@@ -247,9 +253,9 @@ module uram_based_gemv #(
 
     // Output URAM receives the fully reduced MAC result.
     simple_dual_port_uram #(
-        .WIDTH(OUTPUT_WIDTH),
-        .DEPTH(OUTPUT_DEPTH),
-        .ADDR_WIDTH(OUTPUT_ADDR_WIDTH)
+        .WIDTH      (OUTPUT_WIDTH),
+        .DEPTH      (OUTPUT_DEPTH),
+        .ADDR_WIDTH (OUTPUT_ADDR_WIDTH)
     ) u_output_uram (
         .clk     (i_clk                     ),
         .wr_en   (output_uram_wr_en_ff4     ),

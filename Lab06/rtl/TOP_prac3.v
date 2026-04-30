@@ -1,26 +1,31 @@
+//==============================================================================
+// File Name   : TOP_prac3.v
+// Project     : Digital System Design - Lab06
+// Author      : Beomjun Kim
+// Description : Channel-parallel 3x3 convolution engine.
+// Notes       : Each 48-bit input/weight word packs three 16-bit channels, so
+//               channel reduction is performed with the spatial 3x3 MAC.
+//==============================================================================
+
 `timescale 1ns / 1ps
 
-// TOP prac3
-// Channel-parallel 3x3 convolution engine.
-// Each 48-bit input/weight word packs three 16-bit channels, so the channel
-// reduction is performed in the same cycle as the spatial 3x3 MAC.
 module TOP_prac3 #(
-    parameter INPUT_WIDTH = 5,
-    parameter INPUT_HEIGHT = 5,
-    parameter WEIGHT_WIDTH = 3,
+    parameter INPUT_WIDTH   = 5,
+    parameter INPUT_HEIGHT  = 5,
+    parameter WEIGHT_WIDTH  = 3,
     parameter WEIGHT_HEIGHT = 3
 ) (
-    input wire               i_clk,
-    input wire               i_rstn,
-    input wire               i_line_done,
-    input wire               i_input_valid,
-    input wire [47:0]        i_input_data,
-    input wire               i_weight_valid,
-    input wire [47:0]        i_weight_data,
+    input  wire        i_clk,
+    input  wire        i_rstn,
+    input  wire        i_line_done,
+    input  wire        i_input_valid,
+    input  wire [47:0] i_input_data,
+    input  wire        i_weight_valid,
+    input  wire [47:0] i_weight_data,
 
-    output wire              o_output_valid,
-    output wire [31:0]       o_output,
-    output wire              o_line_rd_done
+    output wire        o_output_valid,
+    output wire [31:0] o_output,
+    output wire        o_line_rd_done
 );
 
     // FSM states mirror TOP_prac1, but each pixel contains three channels.
@@ -114,8 +119,7 @@ module TOP_prac3 #(
             for (i = 0; i < 9; i = i + 1) begin
                 r_weight[i] <= 48'd0;
             end
-        end
-        else begin
+        end else begin
             r_output_valid <= 1'b0;
             r_line_rd_done <= 1'b0;
             r_output       <= 32'd0;
