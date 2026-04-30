@@ -36,6 +36,10 @@
 
 module tb_prob1();
 
+    //==============================================================================
+    // Testbench Parameters And Signals
+    //==============================================================================
+
     parameter WIDTH      = 16;
     parameter DEPTH      = 4;
     parameter ADDR_WIDTH = $clog2(DEPTH);
@@ -51,7 +55,9 @@ module tb_prob1();
     wire                  rd_valid;
     wire [WIDTH-1:0]      rd_dout;
 
-    // bram_inst
+    //==============================================================================
+    // DUT Instantiation
+    //==============================================================================
     simple_dual_port_bram #(
         .WIDTH(WIDTH),
         .DEPTH(DEPTH),
@@ -68,7 +74,9 @@ module tb_prob1();
         .rd_dout(rd_dout)
     );
 
-    // 10ns clock period
+    //==============================================================================
+    // Clock Generation
+    //==============================================================================
     initial begin
         clk = 1'b0;
         forever #5 clk = ~clk;
@@ -111,7 +119,7 @@ module tb_prob1();
     endtask
 
     initial begin
-        // initial setting
+        // Initialize all testbench-controlled signals before stimulus starts.
         rstn    = 1'b0;
         wr_en   = 1'b0;
         rd_en   = 1'b0;
@@ -130,17 +138,17 @@ module tb_prob1();
         // The current DUT has no reset port, so rstn gates stimulus start only.
         wait (rstn == 1'b1);
 
-        // ==================================================
+        //==============================================================================
         // WRITE SECTION
-        // ==================================================
+        //==============================================================================
         bram_write(2'd0, 16'h1111);
         bram_write(2'd1, 16'h2222);
         bram_write(2'd2, 16'h3333);
         bram_write(2'd3, 16'h4444);
 
-        // ==================================================
+        //==============================================================================
         // READ SECTION
-        // ==================================================
+        //==============================================================================
         bram_read(2'd0);
         bram_read(2'd1);
         bram_read(2'd2);

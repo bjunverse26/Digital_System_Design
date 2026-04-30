@@ -2,6 +2,10 @@
 
 module tb_prob3();
 
+    //==============================================================================
+    // Testbench Parameters And Signals
+    //==============================================================================
+
     parameter INPUT_WIDTH              = 128;
     parameter WEIGHT_WIDTH             = 128;
     parameter OUTPUT_WIDTH             = 48;
@@ -132,10 +136,18 @@ module tb_prob3();
         .o_output3              (output3)
     );
 
+    //==============================================================================
+    // Clock Generation
+    //==============================================================================
+
     initial begin
         clk = 1'b0;
         forever #5 clk = ~clk;
     end
+
+    //==============================================================================
+    // Test Sequence
+    //==============================================================================
 
     initial begin
         rstn                  = 1'b0;
@@ -175,6 +187,9 @@ module tb_prob3();
         rstn <= 1'b1;
         @(posedge clk);
 
+        //==============================================================================
+        // Reference Matrix And Vector
+        //==============================================================================
         // 4x8 matrix A
         // row0 = [1, 2, 3, 4, 5, 6, 7, 8]
         // row1 = [2, 2, 2, 2, 2, 2, 2, 2]
@@ -215,7 +230,10 @@ module tb_prob3();
         input_wr_addr <= 1'b0;
         input_wr_din  <= 1'b0;
 
-        // input URAM -> input LUTRAM
+        //==============================================================================
+        // URAM To LUTRAM Staging
+        //==============================================================================
+        // Input URAM -> input LUTRAM.
         // weight URAM -> weight LUTRAM
         @(posedge clk);
         input_rd_en           <= 1'b1;
@@ -257,7 +275,10 @@ module tb_prob3();
         input_lutram_wr_en    <= 4'b0000;
         input_lutram_wr_addr  <= 1'b0;
 
-        // clear accumulator
+        //==============================================================================
+        // Output-Stationary Accumulation
+        //==============================================================================
+        // Clear the accumulator before the MAC sweep.
         @(posedge clk);
         acc_clear             <= 1'b1;
         input_lutram_rd_en    <= 1'b0;
@@ -268,7 +289,7 @@ module tb_prob3();
         weight_lutram_rd_sel  <= 0;
         mac_enable            <= 1'b0;
 
-        // output-stationary accumulation
+        // Accumulate one output row across the staged LUTRAM data.
         @(posedge clk);
         acc_clear             <= 1'b0;
         input_lutram_rd_en    <= 1'b1;
@@ -320,7 +341,10 @@ module tb_prob3();
         @(posedge clk);
         mac_enable            <= 1'b0;
 
-        // pack output
+        //==============================================================================
+        // Output Packing And Readback
+        //==============================================================================
+        // Pack the four parallel outputs into the output memory path.
         @(posedge clk);
         output_lutram_wr_en   <= 1'b1;
         output_lutram_wr_addr <= 0;
@@ -351,7 +375,7 @@ module tb_prob3();
         output_lutram_rd_sel  <= 3;
         output_wr_addr        <= 2;
 
-        // output URAM read
+        // Read back the output URAM contents.
         @(posedge clk);
         output_lutram_rd_en   <= 1'b0;
         output_lutram_rd_addr <= 1'b0;

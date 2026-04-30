@@ -35,6 +35,10 @@
 
 module tb_prob2_mc_pe9();
 
+//==============================================================================
+// Testbench Parameters And Signals
+//==============================================================================
+
 parameter INIT_INPUT_BRAM = "C:/Users/rlaqj/Project/Digital_Circuit/Digital_System_Design/Lab05/rtl/prob2/act.txt";
 parameter INIT_WEIGHT_BRAM = "C:/Users/rlaqj/Project/Digital_Circuit/Digital_System_Design/Lab05/rtl/prob2/w.txt";
 
@@ -47,23 +51,31 @@ reg [2:0]   input_bram_rd_addr;
 wire        input_bram_rd_valid;
 wire [47:0] input_bram_rd_dout;
 
+//==============================================================================
+// Input BRAM Model
+//==============================================================================
+
 simple_dual_port_bram #(
     .WIDTH(48),          // 16 Bit * 3 = 48 Bit
     .DEPTH(5),          // 5x3 / 3 = 5
     .INIT_FILE(INIT_INPUT_BRAM)
 ) input_bram (
-    // Not Used
+    // Tie off unused write-side ports.
     .wr_en      (1'b0),
     .wr_addr    (3'b0),
     .wr_din     (48'b0),
     
-    // For Read Activation Data
+    // Drive activation data through the read side.
     .clk        (i_clk),
     .rd_en      (input_bram_rd_en),
     .rd_addr    (input_bram_rd_addr),
     .rd_valid   (input_bram_rd_valid),
     .rd_dout    (input_bram_rd_dout) 
 );
+
+//==============================================================================
+// Weight BRAM Signals And Model
+//==============================================================================
 
 reg         weight_bram_rd_en;
 reg [1:0]   weight_bram_rd_addr;
@@ -75,12 +87,12 @@ simple_dual_port_bram #(
     .DEPTH(3),           // 3x1x3 / 3 = 3
     .INIT_FILE(INIT_WEIGHT_BRAM)
 ) weight_bram (
-    // Not Used
+    // Tie off unused write-side ports.
     .wr_en      (1'b0),
     .wr_addr    (2'b0),
     .wr_din     (48'b0),
     
-    // For Read Weight Data
+    // Drive weight data through the read side.
     .clk        (i_clk),
     .rd_en      (weight_bram_rd_en),
     .rd_addr    (weight_bram_rd_addr),
@@ -88,11 +100,19 @@ simple_dual_port_bram #(
     .rd_dout    (weight_bram_rd_dout) 
 );
 
+//==============================================================================
+// DUT Control And Output Signals
+//==============================================================================
+
 reg         i_act_shift;
 reg         i_w_shift;
 reg         i_pu_en;
 wire [15:0] o_output;
 wire        o_output_valid;
+
+//==============================================================================
+// DUT Instantiation
+//==============================================================================
 
 prob2_mc_pe9 dut(
     .i_clk              (i_clk),
@@ -106,6 +126,10 @@ prob2_mc_pe9 dut(
     .o_output_valid     (o_output_valid)
 );
 
+//==============================================================================
+// Output BRAM Model
+//==============================================================================
+
 reg [1:0]   output_bram_wr_addr;
 
 simple_dual_port_bram #(
@@ -115,22 +139,30 @@ simple_dual_port_bram #(
 )  output_bram (
     .clk        (i_clk),
     
-    // Conv1d Output Write
+    // Capture valid Conv1D outputs into the output BRAM.
     .wr_en      (o_output_valid),
     .wr_addr    (output_bram_wr_addr),
     .wr_din     (o_output),
     
-    // Not Used
+    // Tie off unused read-side ports.
     .rd_en      (1'b0),
     .rd_addr    (2'b0),
     .rd_valid   (),
     .rd_dout    () 
 );
 
+//==============================================================================
+// Clock Generation
+//==============================================================================
+
 initial begin
     i_clk = 0;
     forever #5 i_clk = ~i_clk;   // 100MHz
 end
+
+//==============================================================================
+// Reset Initialization
+//==============================================================================
 
 initial begin
     i_rstn              = 1'b0;
@@ -151,6 +183,10 @@ initial begin
     i_rstn = 1'b1;
 end
 
+//==============================================================================
+// Main Test Sequence
+//==============================================================================
+
 initial begin
     wait(i_rstn == 1'b1);
     @(posedge i_clk);
@@ -162,9 +198,17 @@ initial begin
     $finish;
 end
 
+//==============================================================================
+// Output Write Address Monitor
+//==============================================================================
+
 always @(posedge i_clk) begin
     if (o_output_valid) output_bram_wr_addr <= output_bram_wr_addr + 1;
 end
+
+//==============================================================================
+// Weight Load Task
+//==============================================================================
 
 task read_and_shift_weight;
     begin
@@ -177,6 +221,10 @@ task read_and_shift_weight;
 endtask
 
 
+
+//==============================================================================
+// Activation Compute Task
+//==============================================================================
 
 task read_and_shift_and_compute_act;
     integer i;

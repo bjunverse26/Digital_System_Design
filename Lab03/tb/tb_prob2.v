@@ -36,6 +36,10 @@
 
 module tb_prob2();
 
+    //==============================================================================
+    // Testbench Parameters And Signals
+    //==============================================================================
+
     parameter WIDTH      = 16;
     parameter DEPTH      = 4;
     parameter ADDR_WIDTH = $clog2(DEPTH);
@@ -50,7 +54,9 @@ module tb_prob2();
     wire                  rd_valid;
     wire [WIDTH-1:0]      rd_dout;
 
-    // bram_inst
+    //==============================================================================
+    // DUT Instantiation
+    //==============================================================================
     simple_dual_port_bram #(
         .WIDTH(WIDTH),
         .DEPTH(DEPTH),
@@ -67,14 +73,16 @@ module tb_prob2();
         .rd_dout(rd_dout)
     );
 
-    // 10ns clock period
+    //==============================================================================
+    // Clock Generation
+    //==============================================================================
     initial begin
         clk = 1'b0;
         forever #5 clk = ~clk;
     end
 
     initial begin
-        // initial setting
+        // Initialize all testbench-controlled signals before stimulus starts.
         wr_en   = 1'b0;
         rd_en   = 1'b0;
         wr_addr = 0;
@@ -86,9 +94,9 @@ module tb_prob2();
         $display("       INIT FILE BRAM TEST START             ");
         $display("==============================================");
 
-        // ==================================================
+        //==============================================================================
         // READ SECTION
-        // ==================================================
+        //==============================================================================
         rd_en   = 1'b1;
         rd_addr = 0;
         #10;

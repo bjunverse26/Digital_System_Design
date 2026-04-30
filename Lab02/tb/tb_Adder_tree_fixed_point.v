@@ -2,6 +2,10 @@
 
 module tb_Adder_tree_fixed_point();
 
+    //==============================================================================
+    // Testbench Parameters And Signals
+    //==============================================================================
+
 		reg clk;
 		reg rstn;
 		reg dsp_enable;
@@ -12,6 +16,10 @@ module tb_Adder_tree_fixed_point();
 		reg signed [15:0] weight2;
 		wire signed [15:0] dout;
 		
+		//==============================================================================
+		// DUT Instantiation
+		//==============================================================================
+
 		Adder_tree_fixed_point dut (
 		.i_clk(clk),
 		.i_rstn(rstn),

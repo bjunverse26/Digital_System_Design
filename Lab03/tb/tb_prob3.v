@@ -36,6 +36,10 @@
 
 module tb_prob3();
 
+    //==============================================================================
+    // Testbench Parameters And Signals
+    //==============================================================================
+
     localparam INPUT_WIDTH       = 16;
     localparam WEIGHT_WIDTH      = 16;
     localparam OUTPUT_WIDTH      = 48;
@@ -73,7 +77,9 @@ module tb_prob3();
     wire o_output_rd_valid;
     wire [OUTPUT_WIDTH-1:0] o_output_rd_dout;
 
-    // DUT
+    //==============================================================================
+    // DUT Instantiation
+    //==============================================================================
     mac_with_bram #(
         .INPUT_WIDTH(INPUT_WIDTH),
         .WEIGHT_WIDTH(WEIGHT_WIDTH),
@@ -110,14 +116,16 @@ module tb_prob3();
         .o_output_rd_dout(o_output_rd_dout)
     );
 
-    // clock: 10ns period
+    //==============================================================================
+    // Clock Generation
+    //==============================================================================
     initial begin
         i_clk = 1'b0;
         forever #5 i_clk = ~i_clk;
     end
 
     initial begin
-        // init
+        // Initialize all testbench-controlled signals before reset release.
         i_rstn           = 1'b0;
         i_input_wr_en    = 1'b0;
         i_input_wr_addr  = 0;
@@ -135,7 +143,7 @@ module tb_prob3();
         i_output_rd_en   = 1'b0;
         i_output_rd_addr = 0;
 
-        // reset
+        // Release reset after the initial quiet cycles.
         #20;
         i_rstn = 1'b1;
         $display("[%0t] reset deasserted", $time);

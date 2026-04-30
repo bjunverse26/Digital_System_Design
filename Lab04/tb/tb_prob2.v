@@ -2,6 +2,10 @@
 
 module tb_prob2();
 
+    //==============================================================================
+    // Testbench Parameters And Signals
+    //==============================================================================
+
     parameter INPUT_WIDTH       = 128;
     parameter WEIGHT_WIDTH      = 128;
     parameter OUTPUT_WIDTH      = 48;
@@ -37,7 +41,9 @@ module tb_prob2();
     wire                         output_rd_valid;
     wire [OUTPUT_WIDTH-1:0]      output_rd_dout;
 
-    // DUT
+    //==============================================================================
+    // DUT Instantiation
+    //==============================================================================
     uram_based_gemv #(
         .INPUT_WIDTH      (INPUT_WIDTH),
         .WEIGHT_WIDTH     (WEIGHT_WIDTH),
@@ -70,10 +76,18 @@ module tb_prob2();
         .o_output_rd_dout (output_rd_dout)
     );
 
+    //==============================================================================
+    // Clock Generation
+    //==============================================================================
+
     initial begin
         clk = 1'b0;
         forever #5 clk = ~clk;
     end
+
+    //==============================================================================
+    // Test Sequence
+    //==============================================================================
 
     initial begin
         rstn           = 1'b0;
@@ -97,6 +111,9 @@ module tb_prob2();
         rstn <= 1'b1;
         @(posedge clk);
 
+        //==============================================================================
+        // Reference Matrix And Vector
+        //==============================================================================
         // 4x8 matrix A
         // row0 = [1, 2, 3, 4, 5, 6, 7, 8]
         // row1 = [2, 2, 2, 2, 2, 2, 2, 2]
@@ -137,7 +154,10 @@ module tb_prob2();
         input_wr_addr <= 1'b0;
         input_wr_din  <= 1'b0;
 
-        // input read -> MAC -> 3-stage pipelined adder tree -> output write
+        //==============================================================================
+        // Read Compute Write Sequence
+        //==============================================================================
+        // Input read -> MAC -> 3-stage pipelined adder tree -> output write.
         @(posedge clk);
         input_rd_en    <= 1'b1;
         weight_rd_en   <= 1'b1;
