@@ -48,50 +48,6 @@ Digital System Design은 FPGA/Vivado 기반 RTL 설계 실습과 최종 Super Re
 | Lab05 | PE 기반 convolution | `rtl/pu.v`, `rtl/prob1_sc_pe3.v`, `rtl/prob2_mc_pe9.v` |
 | Lab06 | 2D 및 multi-channel convolution | `rtl/TOP_prac1.v`, `rtl/TOP_prac2.v`, `rtl/TOP_prac3.v` |
 
-## 프로젝트 구조
-
-```text
-Digital_System_Design/
-+-- Lab01/
-|   +-- docs/
-|   +-- ip_repo/
-|   +-- rtl/
-|   +-- Vivado/
-+-- Lab02/
-|   +-- docs/
-|   +-- rtl/
-|   +-- tb/
-+-- Lab03/
-|   +-- docs/
-|   +-- rtl/
-|   +-- sim/
-|   +-- tb/
-+-- Lab04/
-|   +-- docs/
-|   +-- rtl/
-|   +-- sim/
-|   +-- tb/
-+-- Lab05/
-|   +-- docs/
-|   +-- rtl/
-|   +-- sim/
-|   +-- tb/
-+-- Lab06/
-|   +-- docs/
-|   +-- rtl/
-|   +-- sim/
-|   +-- tb/
-+-- LICENSE
-+-- README.md
-```
-
-## 실행 및 확인 방법
-
-1. Vivado에서 각 Lab의 RTL과 testbench를 simulation source로 추가합니다.
-2. `tb/` 폴더의 testbench를 top으로 설정합니다.
-3. XSIM behavioral simulation을 실행해 출력값과 valid timing을 확인합니다.
-4. 입력/weight memory file이 필요한 Lab은 해당 Lab의 `sim/` 또는 testbench 경로를 확인합니다.
-
 ## 검증 결과 요약
 
 - Lab01부터 Lab06까지 단계별 RTL 실습 코드가 정리되어 있습니다.
