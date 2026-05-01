@@ -2,7 +2,7 @@
 
 ## 프로젝트 개요
 
-Digital System Design은 FPGA/Vivado 기반 RTL 설계 실습과 최종 Super Resolution 가속기 프로젝트를 준비하는 학습 저장소입니다. 현재 Lab06까지 코드가 정리되어 있으며, 수업 진행 계획상 Lab07까지 수행한 뒤 Final 프로젝트로 확장할 예정입니다.
+Digital System Design은 FPGA/Vivado 기반 RTL 설계 실습과 최종 Super Resolution 가속기 프로젝트를 준비하는 학습 저장소입니다. 현재 Lab07까지 코드가 정리되어 있으며, 이후 Final 프로젝트로 확장할 예정입니다.
 
 ## 주요 특징
 
@@ -21,8 +21,8 @@ Digital System Design은 FPGA/Vivado 기반 RTL 설계 실습과 최종 Super Re
 | Lab03 | 완료 | BRAM 기반 MAC datapath |
 | Lab04 | 완료 | URAM/LUTRAM 기반 GEMV 구조 |
 | Lab05 | 완료 | PE 기반 1D convolution 구조 |
-| Lab06 | 진행/정리 완료 | 2D convolution, multi-channel convolution 구조 |
-| Lab07 | 예정 | 수업 진행 후 추가 예정 |
+| Lab06 | 완료 | 2D convolution, multi-channel convolution 구조 |
+| Lab07 | 완료 | controller FSM, BRAM 기반 top, 3x3 convolution 구조 |
 | Final Project | 예정 | Super Resolution 가속기 프로젝트 |
 
 ## 상세 스펙
@@ -47,9 +47,10 @@ Digital System Design은 FPGA/Vivado 기반 RTL 설계 실습과 최종 Super Re
 | Lab04 | URAM/LUTRAM 기반 GEMV | `rtl/simple_dual_port_uram.v`, `rtl/simple_line_lutram.v`, `rtl/uram_based_gemv.v`, `rtl/lutram_line_buffer_gemv.v` |
 | Lab05 | PE 기반 convolution | `rtl/pu.v`, `rtl/prob1_sc_pe3.v`, `rtl/prob2_mc_pe9.v` |
 | Lab06 | 2D 및 multi-channel convolution | `rtl/TOP_prac1.v`, `rtl/TOP_prac2.v`, `rtl/TOP_prac3.v` |
+| Lab07 | controller FSM과 BRAM 기반 convolution top | `rtl/controller.v`, `rtl/top.v`, `rtl/TOP_prac1.v` |
 
 ## 검증 결과 요약
 
-- Lab01부터 Lab06까지 단계별 RTL 실습 코드가 정리되어 있습니다.
-- MAC, memory, line buffer, PE, convolution datapath를 Final 프로젝트의 building block으로 재사용할 수 있게 구성했습니다.
-- 현재 저장소는 Lab07과 Final Project를 이어서 추가하는 작업 공간입니다.
+- Lab01부터 Lab07까지 단계별 RTL 실습 코드가 정리되어 있습니다.
+- MAC, memory, line buffer, PE, convolution datapath, controller FSM을 Final 프로젝트의 building block으로 재사용할 수 있게 구성했습니다.
+- 현재 저장소는 Final Project를 이어서 추가하는 작업 공간입니다.
