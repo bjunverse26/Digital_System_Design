@@ -13,191 +13,144 @@ module TOP_prac1 #(
     parameter INPUT_WIDTH   = 5,
     parameter INPUT_HEIGHT  = 5,
     parameter WEIGHT_WIDTH  = 3,
-    parameter WEIGHT_HEIGHT = 3
+    parameter WEIGHT_HEIGHT = 3,
+    parameter DATA_WIDTH    = 16,
+    parameter LINE_WIDTH    = INPUT_WIDTH,
+    parameter KERNEL_SIZE   = WEIGHT_HEIGHT
 ) (
-    input  wire        i_clk,
-    input  wire        i_rstn,
-    input  wire        i_line_done,
-    input  wire        i_input_valid,
-    input  wire [15:0] i_input_data,
-    input  wire        i_weight_valid,
-    input  wire [15:0] i_weight_data,
+    input  wire                         i_clk,
+    input  wire                         i_rstn,
 
-    output wire        o_output_valid,
-    output wire [31:0] o_output,
-    output wire        o_line_rd_done
+    input  wire                         i_line_done,
+    input  wire                         i_input_valid,
+    input  wire signed [DATA_WIDTH-1:0] i_input_data,
+
+    input  wire                         i_weight_valid,
+    input  wire signed [DATA_WIDTH-1:0] i_weight_data,
+
+    output wire                         o_output_valid,
+    output wire signed [(2*DATA_WIDTH)-1:0] o_output,
+    output wire                         o_line_rd_done
 );
 
-    // FSM states for initial fill, window computation, line refill, and done.
-    localparam S_LOAD_FIRST = 2'd0;
-    localparam S_CALC       = 2'd1;
-    localparam S_LOAD_NEXT  = 2'd2;
-    localparam S_DONE       = 2'd3;
+    localparam OUTPUT_WIDTH  = INPUT_WIDTH  - WEIGHT_WIDTH  + 1;
+    localparam OUTPUT_HEIGHT = INPUT_HEIGHT - WEIGHT_HEIGHT + 1;
+    localparam WEIGHT_SIZE   = WEIGHT_WIDTH * WEIGHT_HEIGHT;
 
-    reg [1:0]  r_state;
-    reg        r_output_valid;
-    reg [31:0] r_output;
-    reg        r_line_rd_done;
+    reg                         r_calc_run;
+    reg [1:0]                   r_line_col;
+    reg [1:0]                   r_out_row;
+    reg [3:0]                   r_weight_cnt;
+    reg signed [DATA_WIDTH-1:0] r_weight [0:WEIGHT_SIZE-1];
 
-    // Three 5-pixel line buffers. Each pixel is 16 bits, so one line is 80 bits.
-    reg [79:0] r_line [0:2];
-    reg [3:0]  r_input_cnt;
-    reg [1:0]  r_col_cnt;
-    reg [1:0]  r_row_cnt;
+    wire                        w_last_col;
+    wire                        w_last_row;
+    wire                        w_calc_valid;
+    wire                        w_line_shift;
 
-    // Stored 3x3 kernel weights in row-major order.
-    reg [15:0] r_weight [0:8];
-    reg [3:0]  r_weight_cnt;
+    wire signed [DATA_WIDTH-1:0] w_window_00;
+    wire signed [DATA_WIDTH-1:0] w_window_01;
+    wire signed [DATA_WIDTH-1:0] w_window_02;
+    wire signed [DATA_WIDTH-1:0] w_window_10;
+    wire signed [DATA_WIDTH-1:0] w_window_11;
+    wire signed [DATA_WIDTH-1:0] w_window_12;
+    wire signed [DATA_WIDTH-1:0] w_window_20;
+    wire signed [DATA_WIDTH-1:0] w_window_21;
+    wire signed [DATA_WIDTH-1:0] w_window_22;
 
-    assign o_output_valid = r_output_valid;
-    assign o_output       = r_output;
-    assign o_line_rd_done = r_line_rd_done;
+    assign w_last_col     = r_calc_run && (r_line_col == OUTPUT_WIDTH - 1);
+    assign w_last_row     = (r_out_row == OUTPUT_HEIGHT - 1);
+    assign w_calc_valid   = r_calc_run;
+    assign w_line_shift   = w_last_col && !w_last_row;
+    assign o_line_rd_done = w_line_shift;
 
     integer i;
 
     always @(posedge i_clk or negedge i_rstn) begin
         if (!i_rstn) begin
-            r_state        <= S_LOAD_FIRST;
-            r_output_valid <= 1'b0;
-            r_output       <= 32'd0;
-            r_line_rd_done <= 1'b0;
-            r_input_cnt    <= 4'd0;
-            r_col_cnt      <= 2'd0;
-            r_row_cnt      <= 2'd0;
-            r_weight_cnt   <= 4'd0;
+            r_calc_run   <= 1'b0;
+            r_line_col   <= 2'd0;
+            r_out_row    <= 2'd0;
+            r_weight_cnt <= 4'd0;
 
-            for (i = 0; i < 3; i = i + 1) begin
-                r_line[i] <= 80'd0;
-            end
-
-            for (i = 0; i < 9; i = i + 1) begin
-                r_weight[i] <= 16'd0;
+            for (i = 0; i < WEIGHT_SIZE; i = i + 1) begin
+                r_weight[i] <= {DATA_WIDTH{1'b0}};
             end
         end else begin
-            r_output_valid <= 1'b0;
-            r_line_rd_done <= 1'b0;
-            r_output       <= 32'd0;
-
-            // Weight stream arrives before input data; capture all 9 weights.
-            if (i_weight_valid && r_weight_cnt < 9) begin
+            if (i_weight_valid && (r_weight_cnt < WEIGHT_SIZE)) begin
                 r_weight[r_weight_cnt] <= i_weight_data;
-                r_weight_cnt <= r_weight_cnt + 1'b1;
+                r_weight_cnt           <= r_weight_cnt + 1'b1;
             end
 
-            case (r_state)
-                S_LOAD_FIRST: begin
-                    if (i_input_valid) begin
-                        // Fill the first three input rows before any convolution.
-                        if (r_input_cnt < 5) begin
-                            r_line[0] <= {r_line[0][63:0], i_input_data};
-                        end
-                        else if (r_input_cnt < 10) begin
-                            r_line[1] <= {r_line[1][63:0], i_input_data};
-                        end
-                        else if (r_input_cnt < 15) begin
-                            r_line[2] <= {r_line[2][63:0], i_input_data};
-                        end
+            if (!r_calc_run && i_line_done) begin
+                r_calc_run <= 1'b1;
+                r_line_col <= 2'd0;
+            end else if (r_calc_run) begin
+                if (r_line_col == OUTPUT_WIDTH - 1) begin
+                    r_calc_run <= 1'b0;
+                    r_line_col <= 2'd0;
 
-                        r_input_cnt <= r_input_cnt + 1'b1;
+                    if (r_out_row == OUTPUT_HEIGHT - 1) begin
+                        r_out_row <= 2'd0;
+                    end else begin
+                        r_out_row <= r_out_row + 1'b1;
                     end
-
-                    if (i_line_done) begin
-                        // Testbench has completed the current input burst.
-                        r_state     <= S_CALC;
-                        r_col_cnt   <= 2'd0;
-                        r_input_cnt <= 4'd0;
-                    end
+                end else begin
+                    r_line_col <= r_line_col + 1'b1;
                 end
-
-                S_CALC: begin
-                    // Emit one output per cycle for the current output row.
-                    r_output_valid <= 1'b1;
-
-                    case (r_col_cnt)
-                        2'd0: begin
-                            r_output <=
-                                r_line[0][79:64] * r_weight[0] +
-                                r_line[0][63:48] * r_weight[1] +
-                                r_line[0][47:32] * r_weight[2] +
-                                r_line[1][79:64] * r_weight[3] +
-                                r_line[1][63:48] * r_weight[4] +
-                                r_line[1][47:32] * r_weight[5] +
-                                r_line[2][79:64] * r_weight[6] +
-                                r_line[2][63:48] * r_weight[7] +
-                                r_line[2][47:32] * r_weight[8];
-                        end
-                        2'd1: begin
-                            r_output <=
-                                r_line[0][63:48] * r_weight[0] +
-                                r_line[0][47:32] * r_weight[1] +
-                                r_line[0][31:16] * r_weight[2] +
-                                r_line[1][63:48] * r_weight[3] +
-                                r_line[1][47:32] * r_weight[4] +
-                                r_line[1][31:16] * r_weight[5] +
-                                r_line[2][63:48] * r_weight[6] +
-                                r_line[2][47:32] * r_weight[7] +
-                                r_line[2][31:16] * r_weight[8];
-                        end
-                        default: begin
-                            r_output <=
-                                r_line[0][47:32] * r_weight[0] +
-                                r_line[0][31:16] * r_weight[1] +
-                                r_line[0][15:0]  * r_weight[2] +
-                                r_line[1][47:32] * r_weight[3] +
-                                r_line[1][31:16] * r_weight[4] +
-                                r_line[1][15:0]  * r_weight[5] +
-                                r_line[2][47:32] * r_weight[6] +
-                                r_line[2][31:16] * r_weight[7] +
-                                r_line[2][15:0]  * r_weight[8];
-                        end
-                    endcase
-
-                    if (r_col_cnt == 2) begin
-                        // End of one output row.
-                        r_col_cnt <= 2'd0;
-
-                        if (r_row_cnt == 2) begin
-                            r_state <= S_DONE;
-                        end
-                        else begin
-                            // Advance the line buffer and request one new input row.
-                            r_row_cnt      <= r_row_cnt + 1'b1;
-                            r_line_rd_done <= 1'b1;
-                            r_input_cnt    <= 4'd0;
-                            r_line[0]      <= r_line[1];
-                            r_line[1]      <= r_line[2];
-                            r_line[2]      <= 80'd0;
-                            r_state        <= S_LOAD_NEXT;
-                        end
-                    end
-                    else begin
-                        r_col_cnt <= r_col_cnt + 1'b1;
-                    end
-                end
-
-                S_LOAD_NEXT: begin
-                    if (i_input_valid) begin
-                        // Load the new bottom row after the two older rows shift up.
-                        r_line[2]   <= {r_line[2][63:0], i_input_data};
-                        r_input_cnt <= r_input_cnt + 1'b1;
-                    end
-
-                    if (i_line_done) begin
-                        r_state     <= S_CALC;
-                        r_col_cnt   <= 2'd0;
-                        r_input_cnt <= 4'd0;
-                    end
-                end
-
-                S_DONE: begin
-                    r_state <= S_DONE;
-                end
-
-                default: begin
-                    r_state <= S_LOAD_FIRST;
-                end
-            endcase
+            end
         end
     end
+
+    line_buffer #(
+        .DATA_WIDTH (DATA_WIDTH),
+        .LINE_WIDTH (LINE_WIDTH),
+        .KERNEL_SIZE(KERNEL_SIZE)
+    ) u_line_buffer (
+        .i_clk        (i_clk),
+        .i_rstn       (i_rstn),
+        .i_input_valid(i_input_valid),
+        .i_input_data (i_input_data),
+        .i_line_col   (r_line_col),
+        .i_line_shift (w_line_shift),
+        .o_window_00  (w_window_00),
+        .o_window_01  (w_window_01),
+        .o_window_02  (w_window_02),
+        .o_window_10  (w_window_10),
+        .o_window_11  (w_window_11),
+        .o_window_12  (w_window_12),
+        .o_window_20  (w_window_20),
+        .o_window_21  (w_window_21),
+        .o_window_22  (w_window_22)
+    );
+
+    pe #(
+        .KERNEL_SIZE(KERNEL_SIZE),
+        .DATA_WIDTH (DATA_WIDTH)
+    ) u_pe (
+        .i_clk          (i_clk),
+        .i_rstn         (i_rstn),
+        .i_line_done    (w_calc_valid),
+        .i_window_00    (w_window_00),
+        .i_window_01    (w_window_01),
+        .i_window_02    (w_window_02),
+        .i_window_10    (w_window_10),
+        .i_window_11    (w_window_11),
+        .i_window_12    (w_window_12),
+        .i_window_20    (w_window_20),
+        .i_window_21    (w_window_21),
+        .i_window_22    (w_window_22),
+        .i_weight_00    (r_weight[0]),
+        .i_weight_01    (r_weight[1]),
+        .i_weight_02    (r_weight[2]),
+        .i_weight_10    (r_weight[3]),
+        .i_weight_11    (r_weight[4]),
+        .i_weight_12    (r_weight[5]),
+        .i_weight_20    (r_weight[6]),
+        .i_weight_21    (r_weight[7]),
+        .i_weight_22    (r_weight[8]),
+        .o_output_data  (o_output),
+        .o_output_valid (o_output_valid)
+    );
 
 endmodule
