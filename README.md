@@ -2,55 +2,95 @@
 
 ## 프로젝트 개요
 
-Digital System Design은 FPGA/Vivado 기반 RTL 설계 실습과 최종 Super Resolution 가속기 프로젝트를 준비하는 학습 저장소입니다. 현재 Lab07까지 코드가 정리되어 있으며, 이후 Final 프로젝트로 확장할 예정입니다.
+한 학기 동안 FPGA/Vivado 기반 RTL 설계와 하드웨어 가속기 구조를 학습한 저장소입니다. Lab01부터 Lab07까지 연산 블록, FPGA 메모리, convolution datapath, controller를 단계적으로 구현하고, 최종 프로젝트에서 KV260용 Q8.8 SRCNN 가속기 3종을 완성했습니다.
 
-## 주요 특징
+## 한 학기 학습 과정
 
-- Lab 단위로 RTL, testbench, simulation artifact, 참고 문서 분리 관리
-- MAC, adder tree, BRAM/URAM/LUTRAM, line buffer, PE 기반 convolution 구조 실습
-- Vivado XSIM 기반 기능 검증 흐름 정리
-- FPGA accelerator 설계를 위한 데이터패스와 메모리 구조 단계별 구현
-- 최종 Super Resolution 가속기 설계를 위한 선행 RTL 블록 축적
+| Lab | 주요 내용 |
+| --- | --- |
+| Lab01 | Vivado 프로젝트, VIO/ILA, 기본 RTL |
+| Lab02 | MAC, fixed-point adder tree, pipeline |
+| Lab03 | BRAM 기반 MAC datapath |
+| Lab04 | URAM/LUTRAM 기반 GEMV |
+| Lab05 | PE 기반 1D multi-channel convolution |
+| Lab06 | Line buffer 기반 2D convolution |
+| Lab07 | Controller FSM과 memory-integrated convolution top |
 
-## 진행 현황
+```text
+MAC / Adder Tree → FPGA Memory → Line Buffer / PE
+→ Multi-channel Convolution → Controller FSM → SRCNN Accelerator
+```
 
-| 항목 | 상태 | 내용 |
-| --- | --- | --- |
-| Lab01 | 완료 | Vivado 프로젝트, VIO/ILA, 기본 adder RTL |
-| Lab02 | 완료 | MAC, fixed-point adder tree, pipelined adder tree |
-| Lab03 | 완료 | BRAM 기반 MAC datapath |
-| Lab04 | 완료 | URAM/LUTRAM 기반 GEMV 구조 |
-| Lab05 | 완료 | PE 기반 1D convolution 구조 |
-| Lab06 | 완료 | 2D convolution, multi-channel convolution 구조 |
-| Lab07 | 완료 | controller FSM, BRAM 기반 top, 3x3 convolution 구조 |
-| Final Project | 예정 | Super Resolution 가속기 프로젝트 |
+## Term Project: SRCNN Accelerator
 
-## 상세 스펙
+150x150 Y-channel 이미지 3장에 3-layer SRCNN inference를 수행하는 signed 16-bit Q8.8 RTL accelerator를 설계했습니다.
 
 | 항목 | 내용 |
 | --- | --- |
-| 프로젝트 유형 | 수업 실습 정리 + Final 프로젝트 준비 |
-| 과목 | Digital System Design |
-| 주요 언어 | Verilog, SystemVerilog |
-| 개발 환경 | Xilinx Vivado, XSIM |
-| 주요 자원 | DSP macro, BRAM, URAM, LUTRAM |
-| 핵심 연산 | MAC, adder tree, GEMV, 1D/2D convolution |
-| 최종 목표 | Super Resolution FPGA accelerator |
+| FPGA | AMD Kria KV260 / XCK26 |
+| 개발 환경 | Vivado 2023.1, XSIM |
+| 연산 | 3x3 Conv2D + Bias, Zero Padding, ReLU |
+| 검증 | C++ fixed-point reference와 bit-level 비교 |
+| 목표 주파수 | 100 MHz |
 
-## Lab 구성
+과제에서 Zynq PS, Vitis firmware, AXI/URAM 및 Python demo 환경이 제공되었으며, 팀은 동일한 interface를 따르는 **SRCNN IP 3종과 RTL testbench**를 직접 구현했습니다.
 
-| Lab | 주요 내용 | 핵심 파일 |
-| --- | --- | --- |
-| Lab01 | 기본 RTL과 Vivado debug flow | `rtl/adder.v`, `rtl/top.v` |
-| Lab02 | DSP MAC과 adder tree | `rtl/MAC.v`, `rtl/Adder_tree_fixed_point.v`, `rtl/pipelined_adder_tree.v` |
-| Lab03 | BRAM과 MAC 연결 | `rtl/simple_dual_port_bram.v`, `rtl/mac_with_bram.v` |
-| Lab04 | URAM/LUTRAM 기반 GEMV | `rtl/simple_dual_port_uram.v`, `rtl/simple_line_lutram.v`, `rtl/uram_based_gemv.v`, `rtl/lutram_line_buffer_gemv.v` |
-| Lab05 | PE 기반 convolution | `rtl/pu.v`, `rtl/prob1_sc_pe3.v`, `rtl/prob2_mc_pe9.v` |
-| Lab06 | 2D 및 multi-channel convolution | `rtl/TOP_prac1.v`, `rtl/TOP_prac2.v`, `rtl/TOP_prac3.v` |
-| Lab07 | controller FSM과 BRAM 기반 convolution top | `rtl/controller.v`, `rtl/top.v`, `rtl/TOP_prac1.v` |
+### 아키텍처 비교
 
-## 검증 결과 요약
+| 모델 | Channel | 구조 | 핵심 설계 |
+| --- | --- | --- | --- |
+| SRCNN-42 | `1 → 4 → 2 → 1` | Recursive | Shared datapath와 2-pixel horizontal parallelism |
+| SRCNN-88 | `1 → 8 → 8 → 1` | Recursive | Layer 2의 64-PE channel-wise parallelism |
+| SRCNN-84 | `1 → 8 → 4 → 1` | Streamline | Layer별 PE/line buffer와 stage overlap |
 
-- Lab01부터 Lab07까지 단계별 RTL 실습 코드가 정리되어 있습니다.
-- MAC, memory, line buffer, PE, convolution datapath, controller FSM을 Final 프로젝트의 building block으로 재사용할 수 있게 구성했습니다.
-- 현재 저장소는 Final Project를 이어서 추가하는 작업 공간입니다.
+주요 최적화는 scan-window line buffer, packed activation memory, Q8.8 post-processing, PE pipeline 조정, streamline padding insertion입니다.
+
+## 검증 및 결과
+
+- 세 아키텍처의 Layer 1, Layer 2, final output을 C++ reference와 비교하여 **zero mismatch**를 확인했습니다.
+- Self-checking testbench로 output address/count와 이미지별 completion 신호를 검증했습니다.
+- 세 구현 모두 XCK26 post-route에서 **100 MHz timing constraint**를 만족했습니다.
+- 제공된 PS/Vitis demo 환경에 IP를 통합하여 실제 FPGA 출력과 PSNR 향상을 확인했습니다.
+
+### Latency
+
+100 MHz에서 `i_start`부터 세 번째 이미지의 최종 완료까지 측정한 결과입니다.
+
+| 모델 | Latency | 실행 시간 |
+| --- | ---: | ---: |
+| SRCNN-42 | 275,459 cycles | 2.755 ms |
+| SRCNN-88 | 413,183 cycles | 4.132 ms |
+| SRCNN-84 | 70,297 cycles | 0.703 ms |
+
+### FPGA Resource
+
+| 모델 | CLB LUT | BRAM Tile | DSP | WNS |
+| --- | ---: | ---: | ---: | ---: |
+| SRCNN-42 | 57,820 (49.37%) | 73 (50.69%) | 145 (11.62%) | +0.589 ns |
+| SRCNN-88 | 104,335 (89.08%) | 112 (77.78%) | 577 (46.23%) | +2.012 ns |
+| SRCNN-84 | 40,977 (34.99%) | 33 (22.92%) | 397 (31.81%) | +1.968 ns |
+
+### FPGA Demo
+
+![Bicubic and SRCNN result comparison](./DSD26_Termproject/03_Demo_Environment/srcnn_result.png)
+
+`test_51`, `test_89`, `test_64`에서 SRCNN 적용 후 Y-channel PSNR이 각각 **+6.03 dB, +3.38 dB, +3.10 dB** 향상되었습니다.
+
+## 저장소 구성
+
+```text
+Digital_System_Design/
+├── Lab01 ~ Lab07/               # 주차별 RTL 실습
+└── DSD26_Termproject/
+    ├── 04_SRCNN_42/             # Recursive 4-2
+    ├── 05_SRCNN_88/             # Recursive 8-8
+    ├── 06_SRCNN_84/             # Streamline 8-4
+    └── docs/                    # Proposal, report, presentation
+```
+
+`00_RTL_Skeleton`, `01_Reference_SW`, `02_Provided_Data`, demo source와 수업 가이드는 제공 자료이므로 저장소에서 제외했습니다. 각 구현 폴더에는 RTL, testbench, initialization/reference data, simulation script 및 implementation report가 포함됩니다.
+
+## 프로젝트 문서
+
+- [Final Report](./DSD26_Termproject/docs/DSD26_team6_report.pdf)
+- [Presentation](./DSD26_Termproject/docs/DSD26_team6_presentation.pdf)
