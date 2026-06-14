@@ -1,0 +1,14 @@
+Project     : SRCNN_42
+Tag         : SRCNN_42
+Vivado      : 2023.1
+Run         : impl_1
+Project file: dsd_termprj
+Snapshot dir: C:/DSD26_Termproject_Materials/04_SRCNN_42/impl_snapshot
+Created at  : 2026-06-07 16:24:49 +0900
+
+Artifacts:
+  SRCNN_42_routed.dcp
+  SRCNN_42.bit
+  SRCNN_42_utilization_impl.rpt
+  SRCNN_42_timing_summary_impl.rpt
+  SRCNN_42_power_impl.rpt

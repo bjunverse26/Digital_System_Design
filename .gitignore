@@ -1,2 +1,24 @@
+# Local simulation files
 sim/
-Study.sv
+sim_work/
+xsim.dir/
+*.wdb
+*.pb
+*.jou
+*.log
+*.dcp
+*.bit
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Course-provided project, reference software, and datasets
+DSD26_Termproject/00_RTL_Skeleton/
+DSD26_Termproject/01_Reference_SW/
+DSD26_Termproject/02_Provided_Data/
+DSD26_Termproject/docs/DSD26_Termproject_*.pdf
+
+# Keep only the representative result from the provided demo environment
+DSD26_Termproject/03_Demo_Environment/*
+!DSD26_Termproject/03_Demo_Environment/srcnn_result.png

@@ -1,0 +1,14 @@
+Project     : SRCNN_88
+Tag         : SRCNN_88
+Vivado      : 2023.1
+Run         : impl_1
+Project file: dsd_termprj
+Snapshot dir: C:/DSD26_Termproject_Materials/05_SRCNN_88/impl_snapshot
+Created at  : 2026-06-03 18:11:01 +0900
+
+Artifacts:
+  SRCNN_88_routed.dcp
+  SRCNN_88.bit
+  SRCNN_88_utilization_impl.rpt
+  SRCNN_88_timing_summary_impl.rpt
+  SRCNN_88_power_impl.rpt
