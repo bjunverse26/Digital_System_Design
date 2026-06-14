@@ -65,8 +65,8 @@ module TB_prac3 ();
     localparam LP_DONE              = 3'd7                                          ;
 
     // BRAM initialization files
-    parameter INIT_INPUT_BRAM  = "C:/Users/rlaqj/Project/Digital_System_Design/Lecture/Lab06/rtl/prob3/act.txt";
-    parameter INIT_WEIGHT_BRAM = "C:/Users/rlaqj/Project/Digital_System_Design/Lecture/Lab06/rtl/prob3/w.txt";
+    parameter INIT_INPUT_BRAM  = "C:/Users/rlaqj/Project/Digital_System_Design/Lab06/rtl/prob3/act.txt";
+    parameter INIT_WEIGHT_BRAM = "C:/Users/rlaqj/Project/Digital_System_Design/Lab06/rtl/prob3/w.txt";
 
     //==============================================================================
     // System Signals

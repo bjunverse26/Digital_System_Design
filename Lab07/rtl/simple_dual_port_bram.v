@@ -1,6 +1,6 @@
 //==============================================================================
 // File Name   : simple_dual_port_bram.v
-// Project     : Digital System Design - Lab07
+// Project     : Digital System Design - Lab06
 // Author      : Beomjun Kim
 // Description : Parameterized simple dual-port block RAM wrapper.
 // Notes       : Supports one synchronous write port, one synchronous read port,
